@@ -1,90 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>EternalEcho</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
+    rel="stylesheet"
+  />
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
-      background: radial-gradient(135deg, #1a0033, #001a44);
-      background-size: 200% 200%;
-      animation: bgShift 15s ease infinite;
-      color: #eee;
+      background: #001a44;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      overflow: hidden;
     }
-    @keyframes bgShift {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 100% 100%; }
-      100% { background-position: 0% 0%; }
-    }
-    .panel {
-      backdrop-filter: blur(20px);
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+    #container {
+      background: #fff;
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      padding: 2rem;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 400px;
+      max-width: 90%;
+      padding: 20px;
+      position: relative;
     }
-    .title { text-align: center; font-size: 2rem; margin-bottom: .25rem; }
-    .subtitle { text-align: center; font-size: 1rem; opacity: .7; margin-bottom: 1rem; }
-    textarea, button {
-      width:100%; margin:.75rem 0; padding:1rem;
-      border-radius:12px; border:1px solid rgba(255,255,255,0.2);
-      background:rgba(255,255,255,0.05); color:#eee;
-      font-size:1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-      transition: all .2s;
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      text-align: center;
+      color: #001a44;
+    }
+    #log {
+      margin: 20px 0;
+      height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-family: inherit;
     }
     button {
-      cursor:pointer;
-      background:linear-gradient(145deg,#004455,#002233);
-      display:flex;align-items:center;justify-content:center;gap:.5rem;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #004766;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
     }
-    button:hover { background:linear-gradient(145deg,#005577,#003344); }
-    button:active { transform:translateY(2px); }
-    .icon { font-size:1.2rem; }
-    .waveform {
-      display:none; justify-content:center; gap:4px; margin:1rem 0; height:20px;
-    }
-    .waveform span {
-      width:4px; background:#00e5ff;
-      animation:pulse 1s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0%,100%{height:10px;}50%{height:20px;}
-    }
-    .memory-entry {
-      background:rgba(255,255,255,0.1);
-      border-radius:8px; padding:.75rem; margin-bottom:.5rem;
+    button + button {
+      background: #00334d;
     }
   </style>
 </head>
 <body>
-  <div class="panel" id="app">
-    <h1 class="title">EternalEcho</h1>
-    <p class="subtitle">The voices you love. Still with you.</p>
-    <div class="chat-container">
-      <div id="memory-log"></div>
-      <div class="waveform" id="waveform">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <textarea id="chatInput" rows="2" placeholder="Talk to me..."></textarea>
-      <button id="sendBtn"><span class="icon">✉️</span> Send</button>
-      <button id="missBtn"><span class="icon">💬</span> Miss Them</button>
-    </div>
+  <div id="container">
+    <h1>EternalEcho</h1>
+    <div id="log"></div>
+    <textarea id="input" placeholder="Talk to me…"></textarea>
+    <button id="sendBtn">✉️ Send</button>
+    <button id="missBtn">💬 Miss Them</button>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>

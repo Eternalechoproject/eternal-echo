@@ -1,58 +1,39 @@
-(async () => {
-  // Try reading production vars; if present we skip the setup screen
-  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-  const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+const log = document.getElementById('log');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const missBtn = document.getElementById('missBtn');
 
-  const setupForm = document.getElementById('setup-form');
-  const chatUI    = document.getElementById('chat-ui');
-  const keyOpen   = document.getElementById('openai-key');
-  const keyEleven = document.getElementById('elevenlabs-key');
+function appendLine(who, text) {
+  const p = document.createElement('p');
+  p.innerHTML = `<strong>${who}:</strong> ${text}`;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+}
 
-  // If env vars exist, hide setup and show chat
-  if (OPENAI_API_KEY && ELEVENLABS_API_KEY) {
-    setupForm.style.display = 'none';
-    chatUI.style.display    = 'block';
-  } else {
-    setupForm.style.display = 'block';
-  }
+async function talk(prompt) {
+  appendLine('You', prompt);
+  input.value = '';
+  sendBtn.disabled = true;
+  // call our API (uses env keys on Vercel)
+  const res = await fetch('/api/echo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+  const { text } = await res.json();
+  appendLine('Scarlett', text);
+  sendBtn.disabled = false;
+}
 
-  document.getElementById('save-btn').onclick = () => {
-    localStorage.setItem('OPENAI_API_KEY', keyOpen.value.trim());
-    localStorage.setItem('ELEVENLABS_API_KEY', keyEleven.value.trim());
-    window.location.reload();
-  };
+sendBtn.onclick = () => {
+  const txt = input.value.trim();
+  if (!txt) return;
+  talk(txt);
+};
 
-  async function sendToEcho(text) {
-    const key1 = OPENAI_API_KEY || localStorage.getItem('OPENAI_API_KEY');
-    const key2 = ELEVENLABS_API_KEY || localStorage.getItem('ELEVENLABS_API_KEY');
-    const resp = await fetch('/api/echo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, openaiKey: key1 })
-    });
-    return resp.json();
-  }
+missBtn.onclick = () => {
+  talk('I miss you.');
+};
 
-  async function playTTS(text) {
-    const key2 = ELEVENLABS_API_KEY || localStorage.getItem('ELEVENLABS_API_KEY');
-    const resp = await fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, elevenKey: key2 })
-    });
-    const blob = await resp.blob();
-    const url  = URL.createObjectURL(blob);
-    new Audio(url).play();
-  }
-
-  document.getElementById('send-btn').onclick = async () => {
-    const input = document.getElementById('user-input');
-    const msg   = input.value.trim();
-    if (!msg) return;
-    input.value = '';
-    await playTTS(msg);                 // play your voice
-    const { reply } = await sendToEcho(msg);
-    await playTTS(reply);               // play Scarlett’s voice
-    // append to chat log… (you can hook this up later)
-  };
-})();
+// auto‐start with a greeting
+appendLine('Scarlett', "Hi there—what's on your mind?");
