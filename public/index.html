@@ -27,77 +27,46 @@
     }
     .panel {
       backdrop-filter: blur(20px);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
       padding: 2rem;
       width: 90%;
       max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
     }
-    .title {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 0.25rem;
-    }
-    .subtitle {
-      text-align: center;
-      font-size: 1rem;
-      opacity: 0.7;
-      margin-bottom: 1rem;
-    }
+    .title { text-align: center; font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { text-align: center; font-size: 1rem; opacity: .7; margin-bottom: 1rem; }
     textarea, button {
-      width: 100%;
-      margin: 0.75rem 0;
-      padding: 1rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
-      color: #eee;
-      font-size: 1rem;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-      transition: all 0.2s;
+      width:100%; margin:.75rem 0; padding:1rem;
+      border-radius:12px; border:1px solid rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.05); color:#eee;
+      font-size:1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+      transition: all .2s;
     }
     button {
-      cursor: pointer;
-      background: linear-gradient(145deg, #004455, #002233);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
+      cursor:pointer;
+      background:linear-gradient(145deg,#004455,#002233);
+      display:flex;align-items:center;justify-content:center;gap:.5rem;
     }
-    button:hover {
-      background: linear-gradient(145deg, #005577, #003344);
-    }
-    button:active {
-      transform: translateY(2px);
-    }
-    .icon {
-      font-size: 1.2rem;
-    }
+    button:hover { background:linear-gradient(145deg,#005577,#003344); }
+    button:active { transform:translateY(2px); }
+    .icon { font-size:1.2rem; }
     .waveform {
-      display: none;
-      justify-content: center;
-      gap: 4px;
-      margin: 1rem 0;
-      height: 20px;
+      display:none; justify-content:center; gap:4px; margin:1rem 0; height:20px;
     }
     .waveform span {
-      width: 4px;
-      background: #00e5ff;
-      animation: pulse 1s infinite ease-in-out;
+      width:4px; background:#00e5ff;
+      animation:pulse 1s infinite ease-in-out;
     }
     @keyframes pulse {
-      0%, 100% { height: 10px; }
-      50% { height: 20px; }
+      0%,100%{height:10px;}50%{height:20px;}
     }
     .memory-entry {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
+      background:rgba(255,255,255,0.1);
+      border-radius:8px; padding:.75rem; margin-bottom:.5rem;
     }
   </style>
 </head>
@@ -105,84 +74,17 @@
   <div class="panel" id="app">
     <h1 class="title">EternalEcho</h1>
     <p class="subtitle">The voices you love. Still with you.</p>
-
     <div class="chat-container">
       <div id="memory-log"></div>
-
       <div class="waveform" id="waveform">
         <span></span><span></span><span></span><span></span><span></span>
       </div>
-
       <textarea id="chatInput" rows="2" placeholder="Talk to me..."></textarea>
       <button id="sendBtn"><span class="icon">✉️</span> Send</button>
       <button id="missBtn"><span class="icon">💬</span> Miss Them</button>
     </div>
   </div>
 
-  <script>
-    const memoryLog = document.getElementById(\"memory-log\");
-    const chatInput = document.getElementById(\"chatInput\");
-    const sendBtn = document.getElementById(\"sendBtn\");
-    const missBtn = document.getElementById(\"missBtn\");
-    const waveform = document.getElementById(\"waveform\");
-
-    const persona = {
-      name: \"Scarlett\",
-      tone: \"Warm, intuitive, composed\",
-      voiceId: \"21m00Tcm4TlvDq8ikWAM\" // ElevenLabs voice ID
-    };
-
-    function showWaveform() {
-      waveform.style.display = \"flex\";
-      setTimeout(() => (waveform.style.display = \"none\"), 3000);
-    }
-
-    function appendToLog(role, text) {
-      const entry = document.createElement(\"div\");
-      entry.className = \"memory-entry\";
-      entry.innerHTML = `<strong>${role}:</strong> ${text}`;
-      memoryLog.appendChild(entry);
-      memoryLog.scrollTop = memoryLog.scrollHeight;
-    }
-
-    async function callEchoAPI(prompt) {
-      const res = await fetch(\"/api/echo\", {
-        method: \"POST\",
-        headers: { \"Content-Type\": \"application/json\" },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await res.json();
-      return data.text;
-    }
-
-    async function callTTS(text) {
-      const res = await fetch(\"/api/tts\", {
-        method: \"POST\",
-        headers: { \"Content-Type\": \"application/json\" },
-        body: JSON.stringify({ text, voiceId: persona.voiceId })
-      });
-      const blob = await res.blob();
-      new Audio(URL.createObjectURL(blob)).play();
-    }
-
-    sendBtn.onclick = async () => {
-      const msg = chatInput.value.trim();
-      if (!msg) return;
-      appendToLog(\"You\", msg);
-      chatInput.value = \"\";
-      showWaveform();
-
-      const reply = await callEchoAPI(msg);
-      appendToLog(\"Scarlett\", reply);
-      await callTTS(reply);
-    };
-
-    missBtn.onclick = async () => {
-      const line = \"Hey… you doing okay? I'm still right here.\";
-      appendToLog(\"Scarlett\", line);
-      showWaveform();
-      await callTTS(line);
-    };
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
