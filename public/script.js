@@ -1,64 +1,58 @@
-// === EternalEcho MVP - script.js ===
+(async () => {
+  // Try reading production vars; if present we skip the setup screen
+  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+  const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
-const memoryLog = document.getElementById("memory-log");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-const missBtn = document.getElementById("missBtn");
-const waveform = document.getElementById("waveform");
+  const setupForm = document.getElementById('setup-form');
+  const chatUI    = document.getElementById('chat-ui');
+  const keyOpen   = document.getElementById('openai-key');
+  const keyEleven = document.getElementById('elevenlabs-key');
 
-// Scarlett-style default voice
-const persona = {
-  name: "Scarlett",
-  voiceId: "21m00Tcm4TlvDq8ikWAM"
-};
+  // If env vars exist, hide setup and show chat
+  if (OPENAI_API_KEY && ELEVENLABS_API_KEY) {
+    setupForm.style.display = 'none';
+    chatUI.style.display    = 'block';
+  } else {
+    setupForm.style.display = 'block';
+  }
 
-function showWaveform() {
-  waveform.style.display = "flex";
-  setTimeout(() => waveform.style.display = "none", 3000);
-}
+  document.getElementById('save-btn').onclick = () => {
+    localStorage.setItem('OPENAI_API_KEY', keyOpen.value.trim());
+    localStorage.setItem('ELEVENLABS_API_KEY', keyEleven.value.trim());
+    window.location.reload();
+  };
 
-function appendToLog(role, text) {
-  const div = document.createElement("div");
-  div.className = "memory-entry";
-  div.innerHTML = `<strong>${role}:</strong> ${text}`;
-  memoryLog.appendChild(div);
-  memoryLog.scrollTop = memoryLog.scrollHeight;
-}
+  async function sendToEcho(text) {
+    const key1 = OPENAI_API_KEY || localStorage.getItem('OPENAI_API_KEY');
+    const key2 = ELEVENLABS_API_KEY || localStorage.getItem('ELEVENLABS_API_KEY');
+    const resp = await fetch('/api/echo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, openaiKey: key1 })
+    });
+    return resp.json();
+  }
 
-async function callEchoAPI(prompt) {
-  const res = await fetch("/api/echo", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ prompt })
-  });
-  const json = await res.json();
-  return json.text;
-}
+  async function playTTS(text) {
+    const key2 = ELEVENLABS_API_KEY || localStorage.getItem('ELEVENLABS_API_KEY');
+    const resp = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, elevenKey: key2 })
+    });
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    new Audio(url).play();
+  }
 
-async function callTTS(text) {
-  const res = await fetch("/api/tts", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ text, voiceId: persona.voiceId })
-  });
-  const blob = await res.blob();
-  new Audio(URL.createObjectURL(blob)).play();
-}
-
-sendBtn.onclick = async () => {
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-  appendToLog("You", msg);
-  chatInput.value = "";
-  showWaveform();
-  const reply = await callEchoAPI(msg);
-  appendToLog("Scarlett", reply);
-  await callTTS(reply);
-};
-
-missBtn.onclick = async () => {
-  const line = "Hey… you doing okay? I'm still right here.";
-  appendToLog("Scarlett", line);
-  showWaveform();
-  await callTTS(line);
-};
+  document.getElementById('send-btn').onclick = async () => {
+    const input = document.getElementById('user-input');
+    const msg   = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    await playTTS(msg);                 // play your voice
+    const { reply } = await sendToEcho(msg);
+    await playTTS(reply);               // play Scarlett’s voice
+    // append to chat log… (you can hook this up later)
+  };
+})();
